@@ -2,81 +2,79 @@
   {
     "prompt_version": "extraction_v1",
     "query": "Estimate the price of a 1,850 square foot 2-story house in NAmes with a good kitchen, 2 full baths, 2 garage spaces, built in 2004 and remodeled in 2008.",
-    "raw_model_text": "{\n    \"features\": {\n        \"overall_qual\": null,\n        \"gr_liv_area\": 1850,\n        \"neighborhood\": \"NAmes\",\n        \"kitchen_qual\": \"Gd\",\n        \"garage_cars\": 2,\n        \"total_bsmt_sf\": null,\n        \"year_built\": 2004,\n        \"year_remod_add\": 2008,\n        \"full_bath\": 2,\n        \"house_style\": null\n    }\n}",
+    "raw_model_text": "",
     "normalized_features": {
       "overall_qual": null,
-      "gr_liv_area": 1850.0,
-      "neighborhood": "NAmes",
-      "kitchen_qual": "Gd",
-      "garage_cars": 2,
+      "gr_liv_area": null,
+      "neighborhood": null,
+      "kitchen_qual": null,
+      "garage_cars": null,
       "total_bsmt_sf": null,
-      "year_built": 2004,
-      "year_remod_add": 2008,
-      "full_bath": 2,
+      "year_built": null,
+      "year_remod_add": null,
+      "full_bath": null,
       "house_style": null
     },
-    "validation_passed": true,
-    "used_fallback": false,
-    "extracted_fields": [
+    "validation_passed": false,
+    "used_fallback": true,
+    "extracted_fields": [],
+    "missing_fields": [
+      "overall_qual",
       "gr_liv_area",
       "neighborhood",
       "kitchen_qual",
       "garage_cars",
+      "total_bsmt_sf",
       "year_built",
       "year_remod_add",
-      "full_bath"
-    ],
-    "missing_fields": [
-      "overall_qual",
-      "total_bsmt_sf",
+      "full_bath",
       "house_style"
     ],
-    "extracted_field_count": 7,
+    "extracted_field_count": 0,
     "is_complete": false,
-    "notes": null,
-    "error_type": null
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
   },
   {
     "prompt_version": "extraction_v1",
     "query": "What might a 1-story house in NAmes with a good kitchen and 2-car garage cost?",
-    "raw_model_text": "{\n    \"features\": {\n        \"overall_qual\": null,\n        \"gr_liv_area\": null,\n        \"neighborhood\": \"NAmes\",\n        \"kitchen_qual\": \"Gd\",\n        \"garage_cars\": 2,\n        \"total_bsmt_sf\": null,\n        \"year_built\": null,\n        \"year_remod_add\": null,\n        \"full_bath\": null,\n        \"house_style\": \"1-story\"\n    }\n}",
+    "raw_model_text": "",
     "normalized_features": {
       "overall_qual": null,
       "gr_liv_area": null,
-      "neighborhood": "NAmes",
-      "kitchen_qual": "Gd",
-      "garage_cars": 2,
+      "neighborhood": null,
+      "kitchen_qual": null,
+      "garage_cars": null,
       "total_bsmt_sf": null,
       "year_built": null,
       "year_remod_add": null,
       "full_bath": null,
-      "house_style": "1Story"
+      "house_style": null
     },
-    "validation_passed": true,
-    "used_fallback": false,
-    "extracted_fields": [
-      "neighborhood",
-      "kitchen_qual",
-      "garage_cars",
-      "house_style"
-    ],
+    "validation_passed": false,
+    "used_fallback": true,
+    "extracted_fields": [],
     "missing_fields": [
       "overall_qual",
       "gr_liv_area",
+      "neighborhood",
+      "kitchen_qual",
+      "garage_cars",
       "total_bsmt_sf",
       "year_built",
       "year_remod_add",
-      "full_bath"
+      "full_bath",
+      "house_style"
     ],
-    "extracted_field_count": 4,
+    "extracted_field_count": 0,
     "is_complete": false,
-    "notes": null,
-    "error_type": null
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
   },
   {
     "prompt_version": "extraction_v1",
     "query": "How much is a nice family home with a lot of space?",
-    "raw_model_text": "{\n  \"features\": {\n    \"overall_qual\": null,\n    \"gr_liv_area\": null,\n    \"neighborhood\": null,\n    \"kitchen_qual\": null,\n    \"garage_cars\": null,\n    \"total_bsmt_sf\": null,\n    \"year_built\": null,\n    \"year_remod_add\": null,\n    \"full_bath\": null,\n    \"house_style\": null\n  }\n}",
+    "raw_model_text": "",
     "normalized_features": {
       "overall_qual": null,
       "gr_liv_area": null,
@@ -89,8 +87,8 @@
       "full_bath": null,
       "house_style": null
     },
-    "validation_passed": true,
-    "used_fallback": false,
+    "validation_passed": false,
+    "used_fallback": true,
     "extracted_fields": [],
     "missing_fields": [
       "overall_qual",
@@ -106,87 +104,13 @@
     ],
     "extracted_field_count": 0,
     "is_complete": false,
-    "notes": null,
-    "error_type": null
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
   },
   {
     "prompt_version": "extraction_v1",
     "query": "Estimate a split level home in Gilbert with 1,600 square feet above grade, 2 full baths, and a fair kitchen.",
-    "raw_model_text": "{\n    \"features\": {\n        \"overall_qual\": null,\n        \"gr_liv_area\": 1600,\n        \"neighborhood\": \"Gilbert\",\n        \"kitchen_qual\": \"Fa\",\n        \"garage_cars\": null,\n        \"total_bsmt_sf\": null,\n        \"year_built\": null,\n        \"year_remod_add\": null,\n        \"full_bath\": 2,\n        \"house_style\": \"Split Level\"\n    }\n}",
-    "normalized_features": {
-      "overall_qual": null,
-      "gr_liv_area": 1600.0,
-      "neighborhood": "Gilbert",
-      "kitchen_qual": "Fa",
-      "garage_cars": null,
-      "total_bsmt_sf": null,
-      "year_built": null,
-      "year_remod_add": null,
-      "full_bath": 2,
-      "house_style": "SLvl"
-    },
-    "validation_passed": true,
-    "used_fallback": false,
-    "extracted_fields": [
-      "gr_liv_area",
-      "neighborhood",
-      "kitchen_qual",
-      "full_bath",
-      "house_style"
-    ],
-    "missing_fields": [
-      "overall_qual",
-      "garage_cars",
-      "total_bsmt_sf",
-      "year_built",
-      "year_remod_add"
-    ],
-    "extracted_field_count": 5,
-    "is_complete": false,
-    "notes": null,
-    "error_type": null
-  },
-  {
-    "prompt_version": "extraction_v1",
-    "query": "What is a home in OldTown with an excellent kitchen and 1 garage space worth?",
-    "raw_model_text": "{\n    \"features\": {\n        \"overall_qual\": null,\n        \"gr_liv_area\": null,\n        \"neighborhood\": \"OldTown\",\n        \"kitchen_qual\": \"Ex\",\n        \"garage_cars\": 1,\n        \"total_bsmt_sf\": null,\n        \"year_built\": null,\n        \"year_remod_add\": null,\n        \"full_bath\": null,\n        \"house_style\": null\n    }\n}",
-    "normalized_features": {
-      "overall_qual": null,
-      "gr_liv_area": null,
-      "neighborhood": "OldTown",
-      "kitchen_qual": "Ex",
-      "garage_cars": 1,
-      "total_bsmt_sf": null,
-      "year_built": null,
-      "year_remod_add": null,
-      "full_bath": null,
-      "house_style": null
-    },
-    "validation_passed": true,
-    "used_fallback": false,
-    "extracted_fields": [
-      "neighborhood",
-      "kitchen_qual",
-      "garage_cars"
-    ],
-    "missing_fields": [
-      "overall_qual",
-      "gr_liv_area",
-      "total_bsmt_sf",
-      "year_built",
-      "year_remod_add",
-      "full_bath",
-      "house_style"
-    ],
-    "extracted_field_count": 3,
-    "is_complete": false,
-    "notes": null,
-    "error_type": null
-  },
-  {
-    "prompt_version": "extraction_v1",
-    "query": "Price a house in NAmes.",
-    "raw_model_text": "{\n  \"features\": {\n    \"overall_qual\": null,\n    \"gr_liv_area\": null,\n    \"neighborhood\": null,\n    \"kitchen_qual\": null,\n    \"garage_cars\": null,\n    \"total_bsmt_sf\": null,\n    \"year_built\": null,\n    \"year_remod_add\": null,\n    \"full_bath\": null,\n    \"house_style\": null\n  }\n}",
+    "raw_model_text": "",
     "normalized_features": {
       "overall_qual": null,
       "gr_liv_area": null,
@@ -199,8 +123,8 @@
       "full_bath": null,
       "house_style": null
     },
-    "validation_passed": true,
-    "used_fallback": false,
+    "validation_passed": false,
+    "used_fallback": true,
     "extracted_fields": [],
     "missing_fields": [
       "overall_qual",
@@ -216,87 +140,85 @@
     ],
     "extracted_field_count": 0,
     "is_complete": false,
-    "notes": null,
-    "error_type": null
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
+  },
+  {
+    "prompt_version": "extraction_v1",
+    "query": "What is a home in OldTown with an excellent kitchen and 1 garage space worth?",
+    "raw_model_text": "",
+    "normalized_features": {
+      "overall_qual": null,
+      "gr_liv_area": null,
+      "neighborhood": null,
+      "kitchen_qual": null,
+      "garage_cars": null,
+      "total_bsmt_sf": null,
+      "year_built": null,
+      "year_remod_add": null,
+      "full_bath": null,
+      "house_style": null
+    },
+    "validation_passed": false,
+    "used_fallback": true,
+    "extracted_fields": [],
+    "missing_fields": [
+      "overall_qual",
+      "gr_liv_area",
+      "neighborhood",
+      "kitchen_qual",
+      "garage_cars",
+      "total_bsmt_sf",
+      "year_built",
+      "year_remod_add",
+      "full_bath",
+      "house_style"
+    ],
+    "extracted_field_count": 0,
+    "is_complete": false,
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
+  },
+  {
+    "prompt_version": "extraction_v1",
+    "query": "Price a house in NAmes.",
+    "raw_model_text": "",
+    "normalized_features": {
+      "overall_qual": null,
+      "gr_liv_area": null,
+      "neighborhood": null,
+      "kitchen_qual": null,
+      "garage_cars": null,
+      "total_bsmt_sf": null,
+      "year_built": null,
+      "year_remod_add": null,
+      "full_bath": null,
+      "house_style": null
+    },
+    "validation_passed": false,
+    "used_fallback": true,
+    "extracted_fields": [],
+    "missing_fields": [
+      "overall_qual",
+      "gr_liv_area",
+      "neighborhood",
+      "kitchen_qual",
+      "garage_cars",
+      "total_bsmt_sf",
+      "year_built",
+      "year_remod_add",
+      "full_bath",
+      "house_style"
+    ],
+    "extracted_field_count": 0,
+    "is_complete": false,
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
   },
   {
     "prompt_version": "extraction_v2",
     "query": "Estimate the price of a 1,850 square foot 2-story house in NAmes with a good kitchen, 2 full baths, 2 garage spaces, built in 2004 and remodeled in 2008.",
-    "raw_model_text": "{\n  \"features\": {\n    \"gr_liv_area\": 1850,\n    \"house_style\": \"2Story\",\n    \"kitchen_qual\": \"Gd\",\n    \"garage_cars\": 2,\n    \"full_bath\": 2,\n    \"year_built\": 2004,\n    \"year_remod_add\": 2008\n  },\n  \"notes\": \"\"\n}",
-    "normalized_features": {
-      "overall_qual": null,
-      "gr_liv_area": 1850.0,
-      "neighborhood": null,
-      "kitchen_qual": "Gd",
-      "garage_cars": 2,
-      "total_bsmt_sf": null,
-      "year_built": 2004,
-      "year_remod_add": 2008,
-      "full_bath": 2,
-      "house_style": "2Story"
-    },
-    "validation_passed": true,
-    "used_fallback": false,
-    "extracted_fields": [
-      "gr_liv_area",
-      "kitchen_qual",
-      "garage_cars",
-      "year_built",
-      "year_remod_add",
-      "full_bath",
-      "house_style"
-    ],
-    "missing_fields": [
-      "overall_qual",
-      "neighborhood",
-      "total_bsmt_sf"
-    ],
-    "extracted_field_count": 7,
-    "is_complete": false,
-    "notes": null,
-    "error_type": null
-  },
-  {
-    "prompt_version": "extraction_v2",
-    "query": "What might a 1-story house in NAmes with a good kitchen and 2-car garage cost?",
-    "raw_model_text": "{\n  \"features\": {\n    \"overall_qual\": null,\n    \"gr_liv_area\": null,\n    \"neighborhood\": \"NAmes\",\n    \"kitchen_qual\": \"Gd\",\n    \"garage_cars\": 2,\n    \"total_bsmt_sf\": null,\n    \"year_built\": null,\n    \"year_remod_add\": null,\n    \"full_bath\": null,\n    \"house_style\": \"1Story\"\n  },\n  \"notes\": \"\"\n}",
-    "normalized_features": {
-      "overall_qual": null,
-      "gr_liv_area": null,
-      "neighborhood": "NAmes",
-      "kitchen_qual": "Gd",
-      "garage_cars": 2,
-      "total_bsmt_sf": null,
-      "year_built": null,
-      "year_remod_add": null,
-      "full_bath": null,
-      "house_style": "1Story"
-    },
-    "validation_passed": true,
-    "used_fallback": false,
-    "extracted_fields": [
-      "neighborhood",
-      "kitchen_qual",
-      "garage_cars",
-      "house_style"
-    ],
-    "missing_fields": [
-      "overall_qual",
-      "gr_liv_area",
-      "total_bsmt_sf",
-      "year_built",
-      "year_remod_add",
-      "full_bath"
-    ],
-    "extracted_field_count": 4,
-    "is_complete": false,
-    "notes": null,
-    "error_type": null
-  },
-  {
-    "prompt_version": "extraction_v2",
-    "query": "How much is a nice family home with a lot of space?",
-    "raw_model_text": "{\n  \"features\": {\n    \"overall_qual\": null,\n    \"gr_liv_area\": null,\n    \"neighborhood\": null,\n    \"kitchen_qual\": null,\n    \"garage_cars\": null,\n    \"total_bsmt_sf\": null,\n    \"year_built\": null,\n    \"year_remod_add\": null,\n    \"full_bath\": null,\n    \"house_style\": null\n  },\n  \"notes\": \"\"\n}",
+    "raw_model_text": "",
     "normalized_features": {
       "overall_qual": null,
       "gr_liv_area": null,
@@ -309,8 +231,8 @@
       "full_bath": null,
       "house_style": null
     },
-    "validation_passed": true,
-    "used_fallback": false,
+    "validation_passed": false,
+    "used_fallback": true,
     "extracted_fields": [],
     "missing_fields": [
       "overall_qual",
@@ -326,91 +248,17 @@
     ],
     "extracted_field_count": 0,
     "is_complete": false,
-    "notes": null,
-    "error_type": null
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
   },
   {
     "prompt_version": "extraction_v2",
-    "query": "Estimate a split level home in Gilbert with 1,600 square feet above grade, 2 full baths, and a fair kitchen.",
-    "raw_model_text": "{\n  \"features\": {\n    \"neighborhood\": null,\n    \"kitchen_qual\": \"Fa\",\n    \"house_style\": \"SLvl\",\n    \"gr_liv_area\": 1600,\n    \"full_bath\": 2\n  },\n  \"notes\": \"\"\n}",
-    "normalized_features": {
-      "overall_qual": null,
-      "gr_liv_area": 1600.0,
-      "neighborhood": null,
-      "kitchen_qual": "Fa",
-      "garage_cars": null,
-      "total_bsmt_sf": null,
-      "year_built": null,
-      "year_remod_add": null,
-      "full_bath": 2,
-      "house_style": "SLvl"
-    },
-    "validation_passed": true,
-    "used_fallback": false,
-    "extracted_fields": [
-      "gr_liv_area",
-      "kitchen_qual",
-      "full_bath",
-      "house_style"
-    ],
-    "missing_fields": [
-      "overall_qual",
-      "neighborhood",
-      "garage_cars",
-      "total_bsmt_sf",
-      "year_built",
-      "year_remod_add"
-    ],
-    "extracted_field_count": 4,
-    "is_complete": false,
-    "notes": null,
-    "error_type": null
-  },
-  {
-    "prompt_version": "extraction_v2",
-    "query": "What is a home in OldTown with an excellent kitchen and 1 garage space worth?",
-    "raw_model_text": "{\n  \"features\": {\n    \"kitchen_qual\": \"Ex\",\n    \"garage_cars\": 1,\n    \"neighborhood\": null\n  },\n  \"notes\": \"OldTown\"\n}",
+    "query": "What might a 1-story house in NAmes with a good kitchen and 2-car garage cost?",
+    "raw_model_text": "",
     "normalized_features": {
       "overall_qual": null,
       "gr_liv_area": null,
       "neighborhood": null,
-      "kitchen_qual": "Ex",
-      "garage_cars": 1,
-      "total_bsmt_sf": null,
-      "year_built": null,
-      "year_remod_add": null,
-      "full_bath": null,
-      "house_style": null
-    },
-    "validation_passed": true,
-    "used_fallback": false,
-    "extracted_fields": [
-      "kitchen_qual",
-      "garage_cars"
-    ],
-    "missing_fields": [
-      "overall_qual",
-      "gr_liv_area",
-      "neighborhood",
-      "total_bsmt_sf",
-      "year_built",
-      "year_remod_add",
-      "full_bath",
-      "house_style"
-    ],
-    "extracted_field_count": 2,
-    "is_complete": false,
-    "notes": "OldTown",
-    "error_type": null
-  },
-  {
-    "prompt_version": "extraction_v2",
-    "query": "Price a house in NAmes.",
-    "raw_model_text": "{\n  \"features\": {\n    \"overall_qual\": null,\n    \"gr_liv_area\": null,\n    \"neighborhood\": \"NAmes\",\n    \"kitchen_qual\": null,\n    \"garage_cars\": null,\n    \"total_bsmt_sf\": null,\n    \"year_built\": null,\n    \"year_remod_add\": null,\n    \"full_bath\": null,\n    \"house_style\": null\n  },\n  \"notes\": \"\"\n}",
-    "normalized_features": {
-      "overall_qual": null,
-      "gr_liv_area": null,
-      "neighborhood": "NAmes",
       "kitchen_qual": null,
       "garage_cars": null,
       "total_bsmt_sf": null,
@@ -419,14 +267,13 @@
       "full_bath": null,
       "house_style": null
     },
-    "validation_passed": true,
-    "used_fallback": false,
-    "extracted_fields": [
-      "neighborhood"
-    ],
+    "validation_passed": false,
+    "used_fallback": true,
+    "extracted_fields": [],
     "missing_fields": [
       "overall_qual",
       "gr_liv_area",
+      "neighborhood",
       "kitchen_qual",
       "garage_cars",
       "total_bsmt_sf",
@@ -435,9 +282,153 @@
       "full_bath",
       "house_style"
     ],
-    "extracted_field_count": 1,
+    "extracted_field_count": 0,
     "is_complete": false,
-    "notes": null,
-    "error_type": null
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
+  },
+  {
+    "prompt_version": "extraction_v2",
+    "query": "How much is a nice family home with a lot of space?",
+    "raw_model_text": "",
+    "normalized_features": {
+      "overall_qual": null,
+      "gr_liv_area": null,
+      "neighborhood": null,
+      "kitchen_qual": null,
+      "garage_cars": null,
+      "total_bsmt_sf": null,
+      "year_built": null,
+      "year_remod_add": null,
+      "full_bath": null,
+      "house_style": null
+    },
+    "validation_passed": false,
+    "used_fallback": true,
+    "extracted_fields": [],
+    "missing_fields": [
+      "overall_qual",
+      "gr_liv_area",
+      "neighborhood",
+      "kitchen_qual",
+      "garage_cars",
+      "total_bsmt_sf",
+      "year_built",
+      "year_remod_add",
+      "full_bath",
+      "house_style"
+    ],
+    "extracted_field_count": 0,
+    "is_complete": false,
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
+  },
+  {
+    "prompt_version": "extraction_v2",
+    "query": "Estimate a split level home in Gilbert with 1,600 square feet above grade, 2 full baths, and a fair kitchen.",
+    "raw_model_text": "",
+    "normalized_features": {
+      "overall_qual": null,
+      "gr_liv_area": null,
+      "neighborhood": null,
+      "kitchen_qual": null,
+      "garage_cars": null,
+      "total_bsmt_sf": null,
+      "year_built": null,
+      "year_remod_add": null,
+      "full_bath": null,
+      "house_style": null
+    },
+    "validation_passed": false,
+    "used_fallback": true,
+    "extracted_fields": [],
+    "missing_fields": [
+      "overall_qual",
+      "gr_liv_area",
+      "neighborhood",
+      "kitchen_qual",
+      "garage_cars",
+      "total_bsmt_sf",
+      "year_built",
+      "year_remod_add",
+      "full_bath",
+      "house_style"
+    ],
+    "extracted_field_count": 0,
+    "is_complete": false,
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
+  },
+  {
+    "prompt_version": "extraction_v2",
+    "query": "What is a home in OldTown with an excellent kitchen and 1 garage space worth?",
+    "raw_model_text": "",
+    "normalized_features": {
+      "overall_qual": null,
+      "gr_liv_area": null,
+      "neighborhood": null,
+      "kitchen_qual": null,
+      "garage_cars": null,
+      "total_bsmt_sf": null,
+      "year_built": null,
+      "year_remod_add": null,
+      "full_bath": null,
+      "house_style": null
+    },
+    "validation_passed": false,
+    "used_fallback": true,
+    "extracted_fields": [],
+    "missing_fields": [
+      "overall_qual",
+      "gr_liv_area",
+      "neighborhood",
+      "kitchen_qual",
+      "garage_cars",
+      "total_bsmt_sf",
+      "year_built",
+      "year_remod_add",
+      "full_bath",
+      "house_style"
+    ],
+    "extracted_field_count": 0,
+    "is_complete": false,
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
+  },
+  {
+    "prompt_version": "extraction_v2",
+    "query": "Price a house in NAmes.",
+    "raw_model_text": "",
+    "normalized_features": {
+      "overall_qual": null,
+      "gr_liv_area": null,
+      "neighborhood": null,
+      "kitchen_qual": null,
+      "garage_cars": null,
+      "total_bsmt_sf": null,
+      "year_built": null,
+      "year_remod_add": null,
+      "full_bath": null,
+      "house_style": null
+    },
+    "validation_passed": false,
+    "used_fallback": true,
+    "extracted_fields": [],
+    "missing_fields": [
+      "overall_qual",
+      "gr_liv_area",
+      "neighborhood",
+      "kitchen_qual",
+      "garage_cars",
+      "total_bsmt_sf",
+      "year_built",
+      "year_remod_add",
+      "full_bath",
+      "house_style"
+    ],
+    "extracted_field_count": 0,
+    "is_complete": false,
+    "notes": "Could not reach Ollama service.",
+    "error_type": "transport"
   }
 ]
