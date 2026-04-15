@@ -10,22 +10,27 @@ from app.config import (
     USED_FEATURES_FOR_RESPONSE,
 )
 from app.schemas import (
+    ChainedQueryInput,
+    ChainedQueryResponse,
     ErrorResponse,
     ExtractionResponse,
     PredictionResponse,
     PropertyFeaturesInput,
     QueryInput,
 )
+from app.services.chain_service import ChainServiceError, analyze_query
 from app.services.extraction_service import (
     ExtractionServiceUnavailableError,
     extract_features_from_query,
 )
+from app.services.interpretation_service import load_training_summary
 from app.services.prediction_service import load_model, predict_from_features
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     load_model()
+    load_training_summary()
     yield
 
 
@@ -93,4 +98,26 @@ def extract_features(payload: QueryInput) -> ExtractionResponse:
         raise HTTPException(
             status_code=500,
             detail="Feature extraction failed due to an internal server error.",
+        ) from exc
+
+
+@app.post(
+    "/analyze-query",
+    response_model=ChainedQueryResponse,
+    responses={
+        503: {"model": ErrorResponse},
+        500: {"model": ErrorResponse},
+    },
+)
+def analyze_query_endpoint(payload: ChainedQueryInput) -> ChainedQueryResponse:
+    try:
+        return analyze_query(payload)
+    except ExtractionServiceUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except ChainServiceError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="Query analysis failed due to an internal server error.",
         ) from exc

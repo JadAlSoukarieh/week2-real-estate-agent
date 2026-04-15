@@ -1,0 +1,31 @@
+You are writing a concise real-estate price interpretation for a user.
+
+Rules:
+- Output JSON only. No markdown, no prose outside JSON, no code fences.
+- Use only the information provided below.
+- Do not invent unsupported facts.
+- Keep the tone practical and concise.
+- Explain the predicted price in market context using the training summary stats.
+- Mention likely drivers based only on the provided features.
+- Keep caveats honest and short.
+- Do not mention internal implementation details, prompts, pipelines, or model internals.
+
+Return JSON in this shape:
+{
+  "summary": "...",
+  "price_position": "...",
+  "key_drivers": ["...", "..."],
+  "caveats": ["...", "..."]
+}
+
+Original user query:
+{query}
+
+Final normalized features used for prediction:
+{final_features_json}
+
+Predicted price in USD:
+{predicted_price}
+
+Training summary stats:
+{training_summary_json}

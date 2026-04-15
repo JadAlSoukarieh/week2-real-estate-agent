@@ -1,7 +1,7 @@
-# AI Real Estate Agent - Phase 3 Foundation
+# AI Real Estate Agent - Phase 4 Foundation
 
 ## Project purpose
-This project builds the ML artifact and prompt-chain foundation for a Week 2 AI Real Estate Agent. The current phase includes the frozen Ames Housing model pipeline, a strict structured-feature prediction API, and Stage 1 LLM extraction from natural-language property queries.
+This project builds the ML artifact and prompt-chain foundation for a Week 2 AI Real Estate Agent. The current phase includes the frozen Ames Housing model pipeline, Stage 1 extraction from natural-language queries, and a connected Stage 2 interpretation flow when the final feature set is complete.
 
 ## Current phase scope
 - Train a Ridge regression model on `log1p(SalePrice)`
@@ -10,6 +10,7 @@ This project builds the ML artifact and prompt-chain foundation for a Week 2 AI 
 - Expose a strict FastAPI endpoint for structured feature prediction
 - Extract partial structured features from natural-language queries with Ollama
 - Compare extraction prompt versions with a simple experiment script
+- Run a connected extraction -> overrides -> prediction -> interpretation chain
 
 ## Folder structure
 ```text
@@ -19,9 +20,12 @@ app/
   prompts/
     extraction_v1.txt
     extraction_v2.txt
+    interpretation_v1.txt
   schemas.py
   services/
+    chain_service.py
     extraction_service.py
+    interpretation_service.py
     prediction_service.py
 artifacts/
 data/
@@ -30,6 +34,7 @@ data/
 scripts/
   train.py
   evaluate.py
+  run_chain_smoke_test.py
   run_prompt_experiments.py
 ```
 
@@ -84,8 +89,37 @@ curl -X POST "http://127.0.0.1:8000/extract-features" \
 python3 scripts/run_prompt_experiments.py
 ```
 
+## Phase 4 chained analysis
+The new chained endpoint connects Stage 1 extraction, optional overrides, Phase 2 prediction, and Stage 2 interpretation.
+
+### Override behavior
+- Overrides win only when a non-null override value is provided.
+- A null override does not erase an extracted value.
+- Prediction only runs when all 10 required fields are present after extraction plus overrides.
+
+### Example chained request
+```bash
+curl -X POST "http://127.0.0.1:8000/analyze-query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What might a 1-story house in NAmes with a good kitchen and 2-car garage cost?",
+    "overrides": {
+      "overall_qual": 7,
+      "gr_liv_area": 1710,
+      "total_bsmt_sf": 1080,
+      "year_built": 2003,
+      "year_remod_add": 2003,
+      "full_bath": 2
+    }
+  }'
+```
+
+### Run chain smoke test
+```bash
+python3 scripts/run_chain_smoke_test.py
+```
+
 ## What is not built yet
-- No Stage 2 interpretation
-- No end-to-end orchestration from extraction to prediction
 - No UI
-- No Docker workflow beyond placeholder file presence
+- No Docker workflow refinement
+- No bonus market insights
