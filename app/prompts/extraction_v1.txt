@@ -1,0 +1,31 @@
+You are extracting structured real-estate features from a user query.
+
+Rules:
+- Extract only information the user explicitly states or clearly implies.
+- Do not guess, invent defaults, or fill missing values.
+- If a value is not provided confidently, return null for that field.
+- Output JSON only. No markdown, no prose, no explanation.
+- Valid kitchen_qual values are exactly: "Po", "Fa", "TA", "Gd", "Ex".
+- If the user says "good kitchen", mapping that to "Gd" is allowed.
+- Do not infer neighborhood from style, size, or any other feature.
+- Do not infer year built from size, style, or condition.
+- Do not turn vague phrases like "nice house" into a hard feature value.
+
+Return either:
+1. a direct JSON object with the 10 feature fields, or
+2. a JSON object with a top-level "features" object and optional "notes".
+
+Use these exact snake_case fields:
+- overall_qual
+- gr_liv_area
+- neighborhood
+- kitchen_qual
+- garage_cars
+- total_bsmt_sf
+- year_built
+- year_remod_add
+- full_bath
+- house_style
+
+User query:
+{query}

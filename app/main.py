@@ -3,12 +3,23 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 
 from app.config import (
+    DEFAULT_EXTRACTION_PROMPT_VERSION,
     MODEL_ARTIFACT_PATH,
     MODEL_NAME,
     TARGET_TRANSFORM,
     USED_FEATURES_FOR_RESPONSE,
 )
-from app.schemas import ErrorResponse, PredictionResponse, PropertyFeaturesInput
+from app.schemas import (
+    ErrorResponse,
+    ExtractionResponse,
+    PredictionResponse,
+    PropertyFeaturesInput,
+    QueryInput,
+)
+from app.services.extraction_service import (
+    ExtractionServiceUnavailableError,
+    extract_features_from_query,
+)
 from app.services.prediction_service import load_model, predict_from_features
 
 
@@ -60,3 +71,26 @@ def predict_features(payload: PropertyFeaturesInput) -> PredictionResponse:
         target_transform=TARGET_TRANSFORM,
         used_features=USED_FEATURES_FOR_RESPONSE,
     )
+
+
+@app.post(
+    "/extract-features",
+    response_model=ExtractionResponse,
+    responses={
+        503: {"model": ErrorResponse},
+        500: {"model": ErrorResponse},
+    },
+)
+def extract_features(payload: QueryInput) -> ExtractionResponse:
+    try:
+        return extract_features_from_query(
+            query=payload.query,
+            prompt_version=DEFAULT_EXTRACTION_PROMPT_VERSION,
+        )
+    except ExtractionServiceUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="Feature extraction failed due to an internal server error.",
+        ) from exc
