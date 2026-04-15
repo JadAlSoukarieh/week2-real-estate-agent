@@ -1,0 +1,54 @@
+{
+  "target_column": "SalePrice",
+  "selected_features": [
+    "Overall Qual",
+    "Gr Liv Area",
+    "Neighborhood",
+    "Kitchen Qual",
+    "Garage Cars",
+    "Total Bsmt SF",
+    "Year Built",
+    "Year Remod/Add",
+    "Full Bath",
+    "House Style"
+  ],
+  "numeric_features": [
+    "Overall Qual",
+    "Gr Liv Area",
+    "Garage Cars",
+    "Total Bsmt SF",
+    "Year Built",
+    "Year Remod/Add",
+    "Full Bath"
+  ],
+  "ordinal_features": [
+    "Kitchen Qual"
+  ],
+  "nominal_features": [
+    "Neighborhood",
+    "House Style"
+  ],
+  "kitchen_qual_order": [
+    "Po",
+    "Fa",
+    "TA",
+    "Gd",
+    "Ex"
+  ],
+  "api_to_ames_feature_map": {
+    "overall_qual": "Overall Qual",
+    "gr_liv_area": "Gr Liv Area",
+    "neighborhood": "Neighborhood",
+    "kitchen_qual": "Kitchen Qual",
+    "garage_cars": "Garage Cars",
+    "total_bsmt_sf": "Total Bsmt SF",
+    "year_built": "Year Built",
+    "year_remod_add": "Year Remod/Add",
+    "full_bath": "Full Bath",
+    "house_style": "House Style"
+  },
+  "model_name": "Ridge(alpha=1.0)",
+  "target_transform": "log1p(SalePrice) -> expm1(prediction)",
+  "random_state": 42,
+  "canonical_dataset_path": "/home/jad/AIE-bootcamp/week2-real-estate-agent/data/raw/AmesHousing.csv"
+}

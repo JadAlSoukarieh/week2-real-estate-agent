@@ -1,0 +1,50 @@
+{
+  "model_name": "Ridge(alpha=1.0)",
+  "target_name": "SalePrice",
+  "target_transform": "log1p(SalePrice) -> expm1(prediction)",
+  "selected_features": [
+    "Overall Qual",
+    "Gr Liv Area",
+    "Neighborhood",
+    "Kitchen Qual",
+    "Garage Cars",
+    "Total Bsmt SF",
+    "Year Built",
+    "Year Remod/Add",
+    "Full Bath",
+    "House Style"
+  ],
+  "random_state": 42,
+  "split_sizes": {
+    "train": 2050,
+    "validation": 440,
+    "test": 440
+  },
+  "split_ratios": {
+    "train": 0.7,
+    "validation": 0.15,
+    "test": 0.15
+  },
+  "train_row_count": 2050,
+  "validation_row_count": 440,
+  "test_row_count": 440,
+  "train_sale_price_median": 160000.0,
+  "train_sale_price_mean": 178552.35,
+  "train_price_quantiles": {
+    "0.1": 107360.0,
+    "0.25": 129500.0,
+    "0.5": 160000.0,
+    "0.75": 210000.0,
+    "0.9": 277500.0
+  },
+  "validation_metrics": {
+    "mae": 20682.89,
+    "rmse": 30821.1,
+    "r2": 0.8775
+  },
+  "test_metrics": {
+    "mae": 19074.62,
+    "rmse": 35010.12,
+    "r2": 0.8405
+  }
+}
