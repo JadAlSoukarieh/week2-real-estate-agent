@@ -1,19 +1,39 @@
-# AI Real Estate Agent - Phase 5 Foundation
+# AI Real Estate Agent
 
-## Project purpose
-This project builds the ML artifact, prompt-chain flow, and a polished Streamlit product demo for a Week 2 AI Real Estate Agent. The current phase includes the frozen Ames Housing model pipeline, Stage 1 extraction, Stage 2 interpretation, and a presentation-ready UI on top of the existing FastAPI backend.
+A FastAPI + Streamlit project that estimates Ames, Iowa home prices from either structured feature inputs or a plain-English property description.
 
-## Current phase scope
-- Train a Ridge regression model on `log1p(SalePrice)`
-- Save the fitted preprocessing + model artifact
-- Save training summary and feature config metadata
-- Expose a strict FastAPI endpoint for structured feature prediction
-- Extract partial structured features from natural-language queries with a hosted OpenAI model
-- Compare extraction prompt versions with a simple experiment script
-- Run a connected extraction -> overrides -> prediction -> interpretation chain
-- Run a polished Streamlit UI for end-to-end demo flow
+The app combines:
+- a trained Ridge regression pricing model
+- LLM-based feature extraction from natural language
+- an optional override flow for missing details
+- a concise interpretation layer for the final estimate
 
-## Folder structure
+## What the app does
+
+The backend supports three main workflows:
+- `POST /predict-features`
+  - predict from a complete structured feature payload
+- `POST /extract-features`
+  - extract partial structured features from a natural-language property query
+- `POST /analyze-query`
+  - run the connected flow:
+    - extraction
+    - optional overrides
+    - prediction
+    - interpretation
+
+The Streamlit UI sits on top of `/health` and `/analyze-query` for a cleaner end-to-end demo.
+
+## Tech Stack
+
+- FastAPI
+- Streamlit
+- scikit-learn
+- OpenAI API for hosted LLM calls
+- Docker for backend containerization
+
+## Project Structure
+
 ```text
 app/
   config.py
@@ -27,8 +47,12 @@ app/
     chain_service.py
     extraction_service.py
     interpretation_service.py
+    openai_service.py
     prediction_service.py
 artifacts/
+  best_model.joblib
+  feature_config.json
+  training_summary.json
 data/
   raw/
     AmesHousing.csv
@@ -39,25 +63,88 @@ scripts/
   run_prompt_experiments.py
 ui/
   streamlit_app.py
+Dockerfile
+requirements.txt
 ```
 
-## How to run training
+## Required Environment Variables
+
+Hosted LLM calls now use OpenAI.
+
+Required:
+- `OPENAI_API_KEY`
+
+Optional:
+- `LLM_PROVIDER`
+  - defaults to `openai`
+- `OPENAI_MODEL`
+  - defaults to `gpt-4.1-mini`
+- `BACKEND_BASE_URL`
+  - only needed when pointing the Streamlit UI at a non-default backend URL
+
+Do not commit secrets to the repository, Dockerfile, or tracked config files.
+
+## Local Setup
+
+Install dependencies:
+
 ```bash
 python3 -m pip install -r requirements.txt
+```
+
+Export the required env vars:
+
+```bash
+export LLM_PROVIDER=openai
+export OPENAI_API_KEY="your_openai_api_key"
+export OPENAI_MODEL="gpt-4.1-mini"
+```
+
+## Train the Model
+
+If you need to regenerate artifacts:
+
+```bash
 python3 scripts/train.py
 ```
 
-## How to run evaluation
+Evaluate the saved model:
+
 ```bash
 python3 scripts/evaluate.py
 ```
 
-## How to run the API
+## Run the FastAPI Backend
+
 ```bash
 uvicorn app.main:app --reload
 ```
 
-## Example prediction request payload
+Health check:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+## Run the Streamlit UI
+
+Start the FastAPI backend first, then launch the UI:
+
+```bash
+streamlit run ui/streamlit_app.py
+```
+
+Main UI flow:
+- describe a property in plain English
+- review extracted fields
+- fill or correct any missing details
+- rerun the analysis
+- view the estimate and interpretation
+
+## API Examples
+
+### Predict from structured features
+
 ```bash
 curl -X POST "http://127.0.0.1:8000/predict-features" \
   -H "Content-Type: application/json" \
@@ -75,10 +162,8 @@ curl -X POST "http://127.0.0.1:8000/predict-features" \
   }'
 ```
 
-## Phase 3 Stage 1 extraction
-Stage 1 converts a plain-English property query into validated partial structured features and completeness metadata. It does not perform price prediction from natural language yet.
+### Extract structured features from a query
 
-### Example extraction request
 ```bash
 curl -X POST "http://127.0.0.1:8000/extract-features" \
   -H "Content-Type: application/json" \
@@ -87,108 +172,63 @@ curl -X POST "http://127.0.0.1:8000/extract-features" \
   }'
 ```
 
-### Run prompt experiments
-```bash
-python3 scripts/run_prompt_experiments.py
-```
+### Run the full chained analysis
 
-## Phase 4 chained analysis
-The new chained endpoint connects Stage 1 extraction, optional overrides, Phase 2 prediction, and Stage 2 interpretation.
-
-### Override behavior
-- Overrides win only when a non-null override value is provided.
-- A null override does not erase an extracted value.
-- Prediction only runs when all 10 required fields are present after extraction plus overrides.
-
-### Example chained request
 ```bash
 curl -X POST "http://127.0.0.1:8000/analyze-query" \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "What might a 1-story house in NAmes with a good kitchen and 2-car garage cost?",
-    "overrides": {
-      "overall_qual": 7,
-      "gr_liv_area": 1710,
-      "total_bsmt_sf": 1080,
-      "year_built": 2003,
-      "year_remod_add": 2003,
-      "full_bath": 2
-    }
+    "query": "Estimate the price of a 2-story house in NAmes with overall quality 8 out of 10, 1,850 square feet above ground living area, a good kitchen, 2 garage spaces, 1,100 square feet of basement, built in 2004, remodeled in 2008, and 2 full bathrooms."
   }'
 ```
 
-### Run chain smoke test
+## Prompt and Chain Utilities
+
+Compare extraction prompt versions:
+
+```bash
+python3 scripts/run_prompt_experiments.py
+```
+
+Run the chain smoke test:
+
 ```bash
 python3 scripts/run_chain_smoke_test.py
 ```
 
-## Phase 5 Streamlit UI
-The Streamlit frontend sits on top of the existing FastAPI backend and uses `/health` plus `/analyze-query` as the main integration points.
+## Docker Backend
 
-### Main UI flow
-- enter a natural-language property query
-- review extracted features
-- fill or correct overrides
-- run the chained analysis again
-- view prediction and interpretation in a polished result view
+This project includes a backend-only Docker image for FastAPI.
 
-### Backend requirement
-Start the FastAPI backend before launching the UI.
+Important:
+- `artifacts/` must already exist before building the image
+- the Docker image does not include Streamlit
+- the Docker image does not store your API key
 
-### Run the UI
-```bash
-streamlit run ui/streamlit_app.py
-```
+Build the image:
 
-## Hosted LLM configuration
-Hosted LLM calls now use OpenAI instead of local Ollama for extraction and interpretation.
-
-### Required environment variables
-- `OPENAI_API_KEY`
-- optional: `OPENAI_MODEL` (defaults to `gpt-4.1-mini`)
-- optional: `LLM_PROVIDER` (defaults to `openai`)
-
-Do not commit secrets to source control, Dockerfiles, or tracked config files.
-
-## Phase 6 Docker backend
-The FastAPI backend can now run from Docker as a backend-only container. This phase does not Dockerize the Streamlit UI.
-
-### Important
-The runtime artifacts must already exist before building the image:
-- `artifacts/best_model.joblib`
-- `artifacts/training_summary.json`
-- `artifacts/feature_config.json`
-
-### Build the image
 ```bash
 docker build -t real-estate-agent-api:latest .
 ```
 
-### Run the backend container on Linux
-Pass the OpenAI environment variables into the container at runtime:
+Run the backend container:
 
 ```bash
 docker run --rm \
   -p 8000:8000 \
-  -e OPENAI_API_KEY=your_api_key_here \
-  -e OPENAI_MODEL=gpt-4.1-mini \
+  -e LLM_PROVIDER=openai \
+  -e OPENAI_API_KEY="your_openai_api_key" \
+  -e OPENAI_MODEL="gpt-4.1-mini" \
   real-estate-agent-api:latest
 ```
 
-### Test the container
+Test the running container:
+
 ```bash
 curl http://127.0.0.1:8000/health
 ```
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/extract-features" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "Estimate the price of a 2-story house in NAmes with overall quality 8 out of 10, 1,850 square feet above ground living area, a good kitchen, 2 garage spaces, 1,100 square feet of basement, built in 2004, remodeled in 2008, and 2 full bathrooms."
-  }'
-```
-
-```bash
 curl -X POST "http://127.0.0.1:8000/analyze-query" \
   -H "Content-Type: application/json" \
   -d '{
@@ -196,9 +236,31 @@ curl -X POST "http://127.0.0.1:8000/analyze-query" \
   }'
 ```
 
-### Stop/remove the container
-The example run command already uses `--rm`, so the container is removed automatically when it stops. Use `Ctrl+C` in the terminal running Docker to stop it.
+Stop the container with `Ctrl+C`. The example uses `--rm`, so Docker removes it automatically after stop.
 
-## What is not built yet
-- No Docker workflow refinement
-- No bonus market insights
+## Deployment Notes
+
+For Railway or any similar hosted backend deployment, set these environment variables in the platform:
+- `LLM_PROVIDER=openai`
+- `OPENAI_API_KEY=...`
+- `OPENAI_MODEL=gpt-4.1-mini`
+
+Make sure the deployed service also includes:
+- `app/`
+- `artifacts/`
+- `requirements.txt`
+
+If you deploy only the backend, the Streamlit UI can stay local or be deployed separately later.
+
+## Security Notes
+
+- Never hardcode `OPENAI_API_KEY` in source code
+- Never commit `.env` files with real secrets
+- Prefer environment variables locally, in Docker, and in Railway
+- Rotate any API key that has ever been pasted into chat, screenshots, or shared logs
+
+## Current Limitations
+
+- The pricing model is trained on the Ames Housing dataset, so predictions are scoped to that feature distribution
+- The backend container is Dockerized; the Streamlit UI is not containerized yet
+- The app does not currently include broader market-insight or live listing data
