@@ -49,9 +49,9 @@ TRAINING_SUMMARY_PATH = PROJECT_ROOT / "artifacts" / "training_summary.json"
 FEATURE_CONFIG_PATH = PROJECT_ROOT / "artifacts" / "feature_config.json"
 PROMPT_EVAL_RESULTS_PATH = PROJECT_ROOT / "artifacts" / "prompt_eval_results.json"
 
-OLLAMA_MODEL_NAME = "llama3.1:latest"
+OLLAMA_MODEL_NAME = "gemma3:4b"
 OLLAMA_API_URL = "http://127.0.0.1:11434/api/generate"
-OLLAMA_TIMEOUT_SECONDS = 30
+OLLAMA_TIMEOUT_SECONDS = 400
 OLLAMA_MAX_RETRIES = 2
 OLLAMA_RETRY_DELAY_SECONDS = 1
 EXTRACTION_PROMPT_V1_PATH = PROMPTS_DIR / "extraction_v1.txt"

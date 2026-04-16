@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import logging
+import time
+
 from pydantic import ValidationError
 
 from app.config import (
@@ -24,12 +27,15 @@ from app.services.extraction_service import (
 from app.services.interpretation_service import interpret_prediction
 from app.services.prediction_service import predict_from_features
 
+logger = logging.getLogger(__name__)
+
 
 class ChainServiceError(RuntimeError):
     """Raised when the chain cannot build a valid prediction request."""
 
 
 def analyze_query(payload: ChainedQueryInput) -> ChainedQueryResponse:
+    total_start = time.perf_counter()
     extraction = extract_features_from_query(
         query=payload.query,
         prompt_version=DEFAULT_EXTRACTION_PROMPT_VERSION,
@@ -42,6 +48,11 @@ def analyze_query(payload: ChainedQueryInput) -> ChainedQueryResponse:
     missing_fields = get_missing_fields(merged_features)
 
     if missing_fields:
+        logger.info(
+            "[chain] total_duration=%.2fs outcome=incomplete missing_fields=%s",
+            time.perf_counter() - total_start,
+            ",".join(missing_fields),
+        )
         return ChainedQueryResponse(
             query=payload.query,
             extraction=extraction,
@@ -58,12 +69,22 @@ def analyze_query(payload: ChainedQueryInput) -> ChainedQueryResponse:
         )
 
     strict_features = validate_prediction_features(merged_features)
+    prediction_start = time.perf_counter()
     predicted_price = predict_from_features(strict_features)
+    logger.info(
+        "[predict] duration=%.2fs outcome=success",
+        time.perf_counter() - prediction_start,
+    )
     interpretation = interpret_prediction(
         query=payload.query,
         final_features=merged_features.model_dump(),
         predicted_price=predicted_price,
         prompt_version=DEFAULT_INTERPRETATION_PROMPT_VERSION,
+    )
+
+    logger.info(
+        "[chain] total_duration=%.2fs outcome=complete",
+        time.perf_counter() - total_start,
     )
 
     return ChainedQueryResponse(

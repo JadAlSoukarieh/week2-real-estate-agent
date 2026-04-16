@@ -6,8 +6,16 @@ Rules:
 - Do not invent unsupported facts.
 - Keep the tone practical and concise.
 - Explain the predicted price in market context using the training summary stats.
+- Use the provided deterministic price_position as the market-position label.
+- Compare the prediction only against the overall training distribution, not against any subgroup.
+- Do not make neighborhood-specific market claims.
+- Do not make house-style subgroup market claims.
+- Do not compare against "similar homes" or any benchmark that is not explicitly provided below.
+- Safer phrasing is preferred, such as "above typical range in the training data."
 - Mention likely drivers based only on the provided features.
 - Keep caveats honest and short.
+- Use human-friendly wording, not raw schema labels like "Overall Qual" or "Gr Liv Area".
+- Do not mention evaluation metrics or validation statistics such as RMSE, MAE, R2, or "test set" results.
 - Do not mention internal implementation details, prompts, pipelines, or model internals.
 
 Return JSON in this shape:
@@ -26,6 +34,9 @@ Final normalized features used for prediction:
 
 Predicted price in USD:
 {predicted_price}
+
+Deterministic price position from training quantiles:
+{price_position}
 
 Training summary stats:
 {training_summary_json}

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import logging
+import re
 import time
 from dataclasses import dataclass
 from urllib import error, request
@@ -21,9 +23,20 @@ from app.config import (
 )
 from app.schemas import ExtractedPropertyFeatures, ExtractionResponse
 
+logger = logging.getLogger(__name__)
+
 
 class ExtractionServiceUnavailableError(RuntimeError):
     """Raised when the local Ollama service cannot be reached."""
+
+
+class ExtractionOutputError(RuntimeError):
+    """Raised when the model returns malformed or schema-invalid extraction output."""
+
+    def __init__(self, message: str, raw_model_text: str, error_type: str) -> None:
+        super().__init__(message)
+        self.raw_model_text = raw_model_text
+        self.error_type = error_type
 
 
 @dataclass
@@ -31,7 +44,13 @@ class ExtractionRunResult:
     response: ExtractionResponse
     raw_model_text: str
     used_fallback: bool
+    used_retry: bool = False
+    used_recovery_prompt: bool = False
     error_type: str | None = None
+
+
+PRIMARY_OUTPUT_RETRIES = 1
+RECOVERY_PROMPT_VERSION = "extraction_v2"
 
 
 def extract_features_from_query(
@@ -45,39 +64,120 @@ def run_extraction(
     query: str,
     prompt_version: str = DEFAULT_EXTRACTION_PROMPT_VERSION,
 ) -> ExtractionRunResult:
+    used_retry = False
+    last_output_error: ExtractionOutputError | None = None
+
+    for attempt_index in range(PRIMARY_OUTPUT_RETRIES + 1):
+        try:
+            result = run_single_extraction_attempt(
+                query=query,
+                prompt_version=prompt_version,
+                stage_name="primary",
+                attempt_label=f"primary-{attempt_index + 1}",
+            )
+            result.used_retry = used_retry
+            return result
+        except ExtractionOutputError as exc:
+            last_output_error = exc
+            if attempt_index < PRIMARY_OUTPUT_RETRIES:
+                used_retry = True
+                continue
+
+    if prompt_version != RECOVERY_PROMPT_VERSION:
+        try:
+            recovery_result = run_single_extraction_attempt(
+                query=query,
+                prompt_version=RECOVERY_PROMPT_VERSION,
+                stage_name="recovery",
+                attempt_label="recovery-1",
+            )
+            recovery_result.used_retry = used_retry
+            recovery_result.used_recovery_prompt = True
+            return recovery_result
+        except ExtractionOutputError as exc:
+            last_output_error = exc
+            return build_fallback_result(
+                query=query,
+                prompt_version=prompt_version,
+                raw_model_text=exc.raw_model_text,
+                note=str(exc),
+                error_type=exc.error_type,
+                used_retry=used_retry,
+                used_recovery_prompt=True,
+            )
+
+    return build_fallback_result(
+        query=query,
+        prompt_version=prompt_version,
+        raw_model_text=last_output_error.raw_model_text if last_output_error else "",
+        note=str(last_output_error) if last_output_error else "Model returned invalid JSON.",
+        error_type=last_output_error.error_type if last_output_error else "invalid_json",
+        used_retry=used_retry,
+        used_recovery_prompt=False,
+    )
+
+
+def run_single_extraction_attempt(
+    query: str,
+    prompt_version: str,
+    stage_name: str,
+    attempt_label: str,
+) -> ExtractionRunResult:
+    start_time = time.perf_counter()
     prompt_text = load_prompt_text(prompt_version)
     prompt = prompt_text.replace("{query}", query.strip())
-    raw_model_text = call_ollama(prompt)
+    raw_model_text = call_ollama(
+        prompt=prompt,
+        response_schema=get_extraction_response_schema(),
+    )
 
     try:
         parsed_output = parse_model_output(raw_model_text)
     except (json.JSONDecodeError, ValueError):
-        return build_fallback_result(
-            query=query,
-            prompt_version=prompt_version,
+        duration = time.perf_counter() - start_time
+        logger.info(
+            "[extract] stage=%s attempt=%s prompt=%s duration=%.2fs outcome=invalid_json",
+            stage_name,
+            attempt_label,
+            prompt_version,
+            duration,
+        )
+        raise ExtractionOutputError(
+            "Model returned invalid JSON.",
             raw_model_text=raw_model_text,
-            note="Model returned invalid JSON.",
             error_type="invalid_json",
         )
 
     try:
         features_model, notes = normalize_model_output(parsed_output)
-    except ValidationError:
-        return build_fallback_result(
-            query=query,
-            prompt_version=prompt_version,
+    except (ValidationError, TypeError, ValueError):
+        duration = time.perf_counter() - start_time
+        logger.info(
+            "[extract] stage=%s attempt=%s prompt=%s duration=%.2fs outcome=schema_validation",
+            stage_name,
+            attempt_label,
+            prompt_version,
+            duration,
+        )
+        raise ExtractionOutputError(
+            "Model response failed schema validation.",
             raw_model_text=raw_model_text,
-            note="Model response failed schema validation.",
             error_type="schema_validation",
         )
-    except (TypeError, ValueError):
-        return build_fallback_result(
-            query=query,
-            prompt_version=prompt_version,
-            raw_model_text=raw_model_text,
-            note="Model response failed schema validation.",
-            error_type="schema_validation",
-        )
+
+    features_model = apply_explicit_query_fallbacks(
+        features=features_model,
+        query=query,
+    )
+
+    duration = time.perf_counter() - start_time
+    logger.info(
+        "[extract] stage=%s attempt=%s prompt=%s duration=%.2fs outcome=success",
+        stage_name,
+        attempt_label,
+        prompt_version,
+        duration,
+    )
 
     response = build_extraction_response(
         query=query,
@@ -107,12 +207,12 @@ def get_prompt_path(prompt_version: str):
     raise ValueError(f"Unsupported prompt version: {prompt_version}")
 
 
-def call_ollama(prompt: str) -> str:
+def call_ollama(prompt: str, response_schema: dict) -> str:
     payload = {
         "model": OLLAMA_MODEL_NAME,
         "prompt": prompt,
         "stream": False,
-        "format": "json",
+        "format": response_schema,
         "options": {"temperature": 0},
     }
 
@@ -154,6 +254,43 @@ def call_ollama(prompt: str) -> str:
             return message_content
 
     raise ExtractionServiceUnavailableError("Could not reach Ollama service.")
+
+
+def get_extraction_response_schema() -> dict:
+    nullable_numeric = {"anyOf": [{"type": "integer"}, {"type": "null"}]}
+    nullable_number = {"anyOf": [{"type": "number"}, {"type": "null"}]}
+    nullable_string = {"anyOf": [{"type": "string"}, {"type": "null"}]}
+
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "features": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "overall_qual": nullable_numeric,
+                    "gr_liv_area": nullable_number,
+                    "neighborhood": nullable_string,
+                    "kitchen_qual": {
+                        "anyOf": [
+                            {"enum": ["Po", "Fa", "TA", "Gd", "Ex"]},
+                            {"type": "null"},
+                        ]
+                    },
+                    "garage_cars": nullable_numeric,
+                    "total_bsmt_sf": nullable_number,
+                    "year_built": nullable_numeric,
+                    "year_remod_add": nullable_numeric,
+                    "full_bath": nullable_numeric,
+                    "house_style": nullable_string,
+                },
+                "required": API_FEATURES,
+            },
+            "notes": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        },
+        "required": ["features", "notes"],
+    }
 
 
 def parse_model_output(raw_model_text: str) -> dict:
@@ -201,6 +338,72 @@ def normalize_feature_payload(feature_payload: dict) -> dict:
     if isinstance(house_style, str):
         normalized_payload["house_style"] = normalize_house_style(house_style)
     return normalized_payload
+
+
+def apply_explicit_query_fallbacks(
+    features: ExtractedPropertyFeatures,
+    query: str,
+) -> ExtractedPropertyFeatures:
+    feature_payload = features.model_dump()
+
+    if feature_payload.get("overall_qual") is None:
+        overall_qual = extract_overall_qual_from_query(query)
+        if overall_qual is not None:
+            feature_payload["overall_qual"] = overall_qual
+
+    if feature_payload.get("house_style") is None:
+        house_style = extract_house_style_from_query(query)
+        if house_style is not None:
+            feature_payload["house_style"] = house_style
+
+    return ExtractedPropertyFeatures.model_validate(feature_payload)
+
+
+def extract_overall_qual_from_query(query: str) -> int | None:
+    normalized_query = " ".join(query.strip().lower().split())
+    if not normalized_query:
+        return None
+
+    patterns = [
+        r"\boverall quality\s*(?:is\s*)?([1-9]|10)\s*(?:out of 10|/10)\b",
+        r"\boverall quality\s*(?:score\s*)?([1-9]|10)\b",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, normalized_query)
+        if match is None:
+            continue
+        value = int(match.group(1))
+        if 1 <= value <= 10:
+            return value
+
+    return None
+
+
+def extract_house_style_from_query(query: str) -> str | None:
+    normalized_query = " ".join(query.strip().lower().split())
+    if not normalized_query:
+        return None
+
+    explicit_phrase_order = [
+        ("split foyer", "SFoyer"),
+        ("split-level", "SLvl"),
+        ("split level", "SLvl"),
+        ("1-story", "1Story"),
+        ("1 story", "1Story"),
+        ("one-story", "1Story"),
+        ("one story", "1Story"),
+        ("2-story", "2Story"),
+        ("2 story", "2Story"),
+        ("two-story", "2Story"),
+        ("two story", "2Story"),
+    ]
+
+    for phrase, canonical_value in explicit_phrase_order:
+        if phrase in normalized_query:
+            return canonical_value
+
+    return None
 
 
 def normalize_house_style(value: str) -> str:
@@ -276,6 +479,8 @@ def build_fallback_result(
     raw_model_text: str,
     note: str,
     error_type: str,
+    used_retry: bool = False,
+    used_recovery_prompt: bool = False,
 ) -> ExtractionRunResult:
     response = build_extraction_response(
         query=query,
@@ -288,5 +493,7 @@ def build_fallback_result(
         response=response,
         raw_model_text=raw_model_text,
         used_fallback=True,
+        used_retry=used_retry,
+        used_recovery_prompt=used_recovery_prompt,
         error_type=error_type,
     )

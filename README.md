@@ -1,7 +1,7 @@
-# AI Real Estate Agent - Phase 4 Foundation
+# AI Real Estate Agent - Phase 5 Foundation
 
 ## Project purpose
-This project builds the ML artifact and prompt-chain foundation for a Week 2 AI Real Estate Agent. The current phase includes the frozen Ames Housing model pipeline, Stage 1 extraction from natural-language queries, and a connected Stage 2 interpretation flow when the final feature set is complete.
+This project builds the ML artifact, prompt-chain flow, and a polished Streamlit product demo for a Week 2 AI Real Estate Agent. The current phase includes the frozen Ames Housing model pipeline, Stage 1 extraction, Stage 2 interpretation, and a presentation-ready UI on top of the existing FastAPI backend.
 
 ## Current phase scope
 - Train a Ridge regression model on `log1p(SalePrice)`
@@ -11,6 +11,7 @@ This project builds the ML artifact and prompt-chain foundation for a Week 2 AI 
 - Extract partial structured features from natural-language queries with Ollama
 - Compare extraction prompt versions with a simple experiment script
 - Run a connected extraction -> overrides -> prediction -> interpretation chain
+- Run a polished Streamlit UI for end-to-end demo flow
 
 ## Folder structure
 ```text
@@ -36,6 +37,8 @@ scripts/
   evaluate.py
   run_chain_smoke_test.py
   run_prompt_experiments.py
+ui/
+  streamlit_app.py
 ```
 
 ## How to run training
@@ -119,7 +122,24 @@ curl -X POST "http://127.0.0.1:8000/analyze-query" \
 python3 scripts/run_chain_smoke_test.py
 ```
 
+## Phase 5 Streamlit UI
+The Streamlit frontend sits on top of the existing FastAPI backend and uses `/health` plus `/analyze-query` as the main integration points.
+
+### Main UI flow
+- enter a natural-language property query
+- review extracted features
+- fill or correct overrides
+- run the chained analysis again
+- view prediction and interpretation in a polished result view
+
+### Backend requirement
+Start the FastAPI backend before launching the UI.
+
+### Run the UI
+```bash
+streamlit run ui/streamlit_app.py
+```
+
 ## What is not built yet
-- No UI
 - No Docker workflow refinement
 - No bonus market insights
