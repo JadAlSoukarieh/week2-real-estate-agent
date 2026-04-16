@@ -5,16 +5,21 @@ A FastAPI + Streamlit project that estimates Ames, Iowa home prices from either 
 The app combines:
 - a trained Ridge regression pricing model
 - LLM-based feature extraction from natural language
-- an optional override flow for missing details
+- an override flow for missing details
 - a concise interpretation layer for the final estimate
 
-## What the app does
+---
+
+## What the App Does
 
 The backend supports three main workflows:
+
 - `POST /predict-features`
   - predict from a complete structured feature payload
+
 - `POST /extract-features`
   - extract partial structured features from a natural-language property query
+
 - `POST /analyze-query`
   - run the connected flow:
     - extraction
@@ -22,7 +27,9 @@ The backend supports three main workflows:
     - prediction
     - interpretation
 
-The Streamlit UI sits on top of `/health` and `/analyze-query` for a cleaner end-to-end demo.
+The Streamlit UI sits on top of `/health` and `/analyze-query` for a clean end-to-end demo experience.
+
+---
 
 ## Tech Stack
 
@@ -31,6 +38,8 @@ The Streamlit UI sits on top of `/health` and `/analyze-query` for a cleaner end
 - scikit-learn
 - OpenAI API for hosted LLM calls
 - Docker for backend containerization
+
+---
 
 ## Project Structure
 
@@ -49,50 +58,64 @@ app/
     interpretation_service.py
     openai_service.py
     prediction_service.py
+
 artifacts/
   best_model.joblib
   feature_config.json
   training_summary.json
+
 data/
   raw/
     AmesHousing.csv
+
 scripts/
   train.py
   evaluate.py
   run_chain_smoke_test.py
   run_prompt_experiments.py
+
 ui/
   streamlit_app.py
+
 Dockerfile
 requirements.txt
 ```
 
 ## Required Environment Variables
 
-Hosted LLM calls now use OpenAI.
+Hosted LLM calls use OpenAI.
 
-Required:
+### Required
+
 - `OPENAI_API_KEY`
 
-Optional:
+### Optional
+
 - `LLM_PROVIDER`
   - defaults to `openai`
 - `OPENAI_MODEL`
   - defaults to `gpt-4.1-mini`
 - `BACKEND_BASE_URL`
-  - only needed when pointing the Streamlit UI at a non-default backend URL
+  - only needed when the Streamlit UI should point to a non-default backend URL
 
 Do not commit secrets to the repository, Dockerfile, or tracked config files.
 
 ## Local Setup
 
+Create and activate a virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
 Install dependencies:
 
 ```bash
-python3 -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-Export the required env vars:
+Export environment variables:
 
 ```bash
 export LLM_PROVIDER=openai
@@ -134,10 +157,11 @@ Start the FastAPI backend first, then launch the UI:
 streamlit run ui/streamlit_app.py
 ```
 
-Main UI flow:
+### Main UI flow
+
 - describe a property in plain English
 - review extracted fields
-- fill or correct any missing details
+- fill or correct missing details
 - rerun the analysis
 - view the estimate and interpretation
 
@@ -198,9 +222,11 @@ python3 scripts/run_chain_smoke_test.py
 
 ## Docker Backend
 
-This project includes a backend-only Docker image for FastAPI.
+This project intentionally Dockerizes the FastAPI backend only.  
+The Streamlit UI is meant to run separately.
 
-Important:
+### Important
+
 - `artifacts/` must already exist before building the image
 - the Docker image does not include Streamlit
 - the Docker image does not store your API key
@@ -236,31 +262,44 @@ curl -X POST "http://127.0.0.1:8000/analyze-query" \
   }'
 ```
 
-Stop the container with `Ctrl+C`. The example uses `--rm`, so Docker removes it automatically after stop.
+Stop the container with `Ctrl+C`. Because the example uses `--rm`, Docker removes it automatically after stop.
 
 ## Deployment Notes
 
-For Railway or any similar hosted backend deployment, set these environment variables in the platform:
+### Render (FastAPI backend)
+
+For Render or any similar hosted backend deployment, set these environment variables in the platform:
+
 - `LLM_PROVIDER=openai`
 - `OPENAI_API_KEY=...`
 - `OPENAI_MODEL=gpt-4.1-mini`
 
-Make sure the deployed service also includes:
+Make sure the deployed backend includes:
+
 - `app/`
 - `artifacts/`
 - `requirements.txt`
 
-If you deploy only the backend, the Streamlit UI can stay local or be deployed separately later.
+### Streamlit Community Cloud (UI)
+
+If you deploy the Streamlit UI separately, set:
+
+```bash
+BACKEND_BASE_URL=https://your-render-api-url.onrender.com
+```
+
+so the UI points to the deployed backend instead of localhost.
 
 ## Security Notes
 
 - Never hardcode `OPENAI_API_KEY` in source code
 - Never commit `.env` files with real secrets
-- Prefer environment variables locally, in Docker, and in Railway
+- Never commit `.streamlit/secrets.toml` with real secrets
+- Prefer environment variables locally, in Docker, and in deployment platforms
 - Rotate any API key that has ever been pasted into chat, screenshots, or shared logs
 
 ## Current Limitations
 
 - The pricing model is trained on the Ames Housing dataset, so predictions are scoped to that feature distribution
-- The backend container is Dockerized; the Streamlit UI is not containerized yet
+- The FastAPI backend is Dockerized; the Streamlit UI is deployed separately rather than containerized
 - The app does not currently include broader market-insight or live listing data
