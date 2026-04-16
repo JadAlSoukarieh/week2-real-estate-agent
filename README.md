@@ -8,7 +8,7 @@ This project builds the ML artifact, prompt-chain flow, and a polished Streamlit
 - Save the fitted preprocessing + model artifact
 - Save training summary and feature config metadata
 - Expose a strict FastAPI endpoint for structured feature prediction
-- Extract partial structured features from natural-language queries with Ollama
+- Extract partial structured features from natural-language queries with a hosted OpenAI model
 - Compare extraction prompt versions with a simple experiment script
 - Run a connected extraction -> overrides -> prediction -> interpretation chain
 - Run a polished Streamlit UI for end-to-end demo flow
@@ -140,6 +140,16 @@ Start the FastAPI backend before launching the UI.
 streamlit run ui/streamlit_app.py
 ```
 
+## Hosted LLM configuration
+Hosted LLM calls now use OpenAI instead of local Ollama for extraction and interpretation.
+
+### Required environment variables
+- `OPENAI_API_KEY`
+- optional: `OPENAI_MODEL` (defaults to `gpt-4.1-mini`)
+- optional: `LLM_PROVIDER` (defaults to `openai`)
+
+Do not commit secrets to source control, Dockerfiles, or tracked config files.
+
 ## Phase 6 Docker backend
 The FastAPI backend can now run from Docker as a backend-only container. This phase does not Dockerize the Streamlit UI.
 
@@ -155,13 +165,13 @@ docker build -t real-estate-agent-api:latest .
 ```
 
 ### Run the backend container on Linux
-This backend container still talks to Ollama on the host machine, so pass the host Ollama URL explicitly:
+Pass the OpenAI environment variables into the container at runtime:
 
 ```bash
 docker run --rm \
   -p 8000:8000 \
-  --add-host=host.docker.internal:host-gateway \
-  -e OLLAMA_API_URL=http://host.docker.internal:11434/api/generate \
+  -e OPENAI_API_KEY=your_api_key_here \
+  -e OPENAI_MODEL=gpt-4.1-mini \
   real-estate-agent-api:latest
 ```
 

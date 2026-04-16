@@ -58,6 +58,14 @@ OLLAMA_API_URL = os.getenv(
 OLLAMA_TIMEOUT_SECONDS = 400
 OLLAMA_MAX_RETRIES = 2
 OLLAMA_RETRY_DELAY_SECONDS = 1
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+OPENAI_API_URL = os.getenv(
+    "OPENAI_API_URL",
+    "https://api.openai.com/v1/chat/completions",
+)
+OPENAI_TIMEOUT_SECONDS = 120
 EXTRACTION_PROMPT_V1_PATH = PROMPTS_DIR / "extraction_v1.txt"
 EXTRACTION_PROMPT_V2_PATH = PROMPTS_DIR / "extraction_v2.txt"
 DEFAULT_EXTRACTION_PROMPT_VERSION = "extraction_v1"

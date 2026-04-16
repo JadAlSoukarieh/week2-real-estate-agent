@@ -579,7 +579,7 @@ def render_example_queries() -> None:
 def render_query_form() -> None:
     st.markdown('<div class="section-heading">Describe the Property</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="section-copy">Write the property the way a buyer or seller would describe it. The backend handles extraction, merge rules, prediction gating, and interpretation.</div>',
+        '<div class="section-copy">Write the property the way a buyer or seller would describe it. The app will pull out the details it can, highlight anything missing, and generate an estimate when enough information is available.</div>',
         unsafe_allow_html=True,
     )
     with st.form("query_form"):
@@ -622,14 +622,11 @@ def render_extraction_section(normalized_response: dict[str, Any]) -> None:
     st.markdown('<div class="panel-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-heading">Extraction Review</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="section-copy">This is what the backend extracted before considering any new overrides.</div>',
+        '<div class="section-copy">Here is what the app understood from your description before any edits or additions.</div>',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f"""
-        <span class="status-chip {readiness_class}">{readiness_label}</span>
-        <span class="info-chip">Prompt: {extraction['prompt_version'] or '—'}</span>
-        """,
+        f'<span class="status-chip {readiness_class}">{readiness_label}</span>',
         unsafe_allow_html=True,
     )
 
@@ -639,7 +636,7 @@ def render_extraction_section(normalized_response: dict[str, Any]) -> None:
         )
     else:
         st.markdown(
-            '<div class="section-copy">No feature values were extracted yet. Use the override form below to complete the property profile.</div>',
+            '<div class="section-copy">No property details were confidently extracted yet. Use the form below to fill in the profile.</div>',
             unsafe_allow_html=True,
         )
 
@@ -660,7 +657,7 @@ def render_extraction_section(normalized_response: dict[str, Any]) -> None:
 def render_override_form(normalized_response: dict[str, Any] | None) -> None:
     st.markdown('<div class="section-heading">Review or Fill Missing Details</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="section-copy">Only changed values are sent back as overrides. Leaving a field blank means “do not override.”</div>',
+        '<div class="section-copy">Only the changes you make here are applied. Leaving a field blank keeps the current value unchanged.</div>',
         unsafe_allow_html=True,
     )
 
@@ -754,8 +751,8 @@ def render_incomplete_state(normalized_response: dict[str, Any]) -> None:
         <div class="incomplete-card">
             <div class="section-heading">Not Ready for Prediction Yet</div>
             <div class="section-copy">
-                The backend kept the analysis cautious and did not fabricate defaults.
-                Add the remaining details below to unlock the estimate and interpretation.
+                The estimate is not ready yet because a few important property details are still missing.
+                Add the remaining information below to continue.
             </div>
         </div>
         """,
@@ -821,7 +818,7 @@ def render_final_features_panel(final_features: dict[str, Any]) -> None:
     st.markdown('<div class="panel-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-heading">Final Features Used</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="section-copy">These are the normalized feature values that the backend used for the final prediction.</div>',
+        '<div class="section-copy">These are the normalized property details used for the final estimate.</div>',
         unsafe_allow_html=True,
     )
     render_feature_cards(
@@ -872,7 +869,7 @@ def render_footer() -> None:
         """
         <div class="footer-card">
             <div class="footer-note">
-                This demo estimate is based only on the provided features and the trained Ames Housing model pipeline.
+                This estimate is based only on the details provided and the project’s trained pricing model.
             </div>
         </div>
         """,

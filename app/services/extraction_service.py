@@ -5,7 +5,6 @@ import logging
 import re
 import time
 from dataclasses import dataclass
-from urllib import error, request
 
 from pydantic import ValidationError
 
@@ -15,19 +14,19 @@ from app.config import (
     EXTRACTION_PROMPT_V1_PATH,
     EXTRACTION_PROMPT_V2_PATH,
     HOUSE_STYLE_NORMALIZATION_MAP,
-    OLLAMA_API_URL,
-    OLLAMA_MAX_RETRIES,
-    OLLAMA_MODEL_NAME,
-    OLLAMA_RETRY_DELAY_SECONDS,
-    OLLAMA_TIMEOUT_SECONDS,
 )
 from app.schemas import ExtractedPropertyFeatures, ExtractionResponse
+from app.services.openai_service import (
+    OpenAIConfigurationError,
+    OpenAIServiceError,
+    call_openai_structured,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class ExtractionServiceUnavailableError(RuntimeError):
-    """Raised when the local Ollama service cannot be reached."""
+    """Raised when the hosted LLM provider cannot be reached."""
 
 
 class ExtractionOutputError(RuntimeError):
@@ -208,52 +207,14 @@ def get_prompt_path(prompt_version: str):
 
 
 def call_ollama(prompt: str, response_schema: dict) -> str:
-    payload = {
-        "model": OLLAMA_MODEL_NAME,
-        "prompt": prompt,
-        "stream": False,
-        "format": response_schema,
-        "options": {"temperature": 0},
-    }
-
-    request_body = json.dumps(payload).encode("utf-8")
-    http_request = request.Request(
-        OLLAMA_API_URL,
-        data=request_body,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-
-    for attempt in range(OLLAMA_MAX_RETRIES + 1):
-        try:
-            with request.urlopen(http_request, timeout=OLLAMA_TIMEOUT_SECONDS) as response:
-                response_body = response.read().decode("utf-8")
-            break
-        except (error.URLError, TimeoutError, ConnectionError) as exc:
-            if attempt == OLLAMA_MAX_RETRIES:
-                raise ExtractionServiceUnavailableError(
-                    "Could not reach Ollama service."
-                ) from exc
-            time.sleep(OLLAMA_RETRY_DELAY_SECONDS)
-
     try:
-        response_payload = json.loads(response_body)
-    except json.JSONDecodeError as exc:
-        raise ExtractionServiceUnavailableError(
-            "Could not reach Ollama service."
-        ) from exc
-
-    generated_text = response_payload.get("response")
-    if isinstance(generated_text, str):
-        return generated_text
-
-    message_payload = response_payload.get("message")
-    if isinstance(message_payload, dict):
-        message_content = message_payload.get("content")
-        if isinstance(message_content, str):
-            return message_content
-
-    raise ExtractionServiceUnavailableError("Could not reach Ollama service.")
+        return call_openai_structured(
+            prompt=prompt,
+            schema_name="extraction_response",
+            schema=response_schema,
+        )
+    except (OpenAIConfigurationError, OpenAIServiceError) as exc:
+        raise ExtractionServiceUnavailableError(str(exc)) from exc
 
 
 def get_extraction_response_schema() -> dict:

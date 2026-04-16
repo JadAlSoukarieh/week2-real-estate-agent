@@ -4,20 +4,21 @@ import json
 import logging
 import time
 from typing import Any
-from urllib import error, request
 
 from pydantic import ValidationError
 
 from app.config import (
     DEFAULT_INTERPRETATION_PROMPT_VERSION,
     INTERPRETATION_PROMPT_V1_PATH,
-    OLLAMA_API_URL,
-    OLLAMA_MODEL_NAME,
-    OLLAMA_TIMEOUT_SECONDS,
     TRAINING_SUMMARY_PATH,
 )
 from app.schemas import InterpretationOutput
 from app.services.extraction_service import strip_code_fences
+from app.services.openai_service import (
+    OpenAIConfigurationError,
+    OpenAIServiceError,
+    call_openai_structured,
+)
 
 logger = logging.getLogger(__name__)
 _training_summary_cache: dict[str, Any] | None = None
@@ -101,52 +102,18 @@ def get_prompt_path(prompt_version: str):
 
 
 class InterpretationServiceUnavailableError(RuntimeError):
-    """Raised when the local Ollama service cannot be reached for interpretation."""
+    """Raised when the hosted LLM provider cannot be reached for interpretation."""
 
 
 def call_ollama(prompt: str, response_schema: dict) -> str:
-    payload = {
-        "model": OLLAMA_MODEL_NAME,
-        "prompt": prompt,
-        "stream": False,
-        "format": response_schema,
-        "options": {"temperature": 0},
-    }
-
-    request_body = json.dumps(payload).encode("utf-8")
-    http_request = request.Request(
-        OLLAMA_API_URL,
-        data=request_body,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-
     try:
-        with request.urlopen(http_request, timeout=OLLAMA_TIMEOUT_SECONDS) as response:
-            response_body = response.read().decode("utf-8")
-    except (error.URLError, TimeoutError, ConnectionError) as exc:
-        raise InterpretationServiceUnavailableError(
-            "Could not reach Ollama service."
-        ) from exc
-
-    try:
-        response_payload = json.loads(response_body)
-    except json.JSONDecodeError as exc:
-        raise InterpretationServiceUnavailableError(
-            "Could not reach Ollama service."
-        ) from exc
-
-    generated_text = response_payload.get("response")
-    if isinstance(generated_text, str):
-        return generated_text
-
-    message_payload = response_payload.get("message")
-    if isinstance(message_payload, dict):
-        message_content = message_payload.get("content")
-        if isinstance(message_content, str):
-            return message_content
-
-    raise InterpretationServiceUnavailableError("Could not reach Ollama service.")
+        return call_openai_structured(
+            prompt=prompt,
+            schema_name="interpretation_response",
+            schema=response_schema,
+        )
+    except (OpenAIConfigurationError, OpenAIServiceError) as exc:
+        raise InterpretationServiceUnavailableError(str(exc)) from exc
 
 
 def get_interpretation_response_schema() -> dict:
