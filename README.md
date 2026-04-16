@@ -140,6 +140,55 @@ Start the FastAPI backend before launching the UI.
 streamlit run ui/streamlit_app.py
 ```
 
+## Phase 6 Docker backend
+The FastAPI backend can now run from Docker as a backend-only container. This phase does not Dockerize the Streamlit UI.
+
+### Important
+The runtime artifacts must already exist before building the image:
+- `artifacts/best_model.joblib`
+- `artifacts/training_summary.json`
+- `artifacts/feature_config.json`
+
+### Build the image
+```bash
+docker build -t real-estate-agent-api:latest .
+```
+
+### Run the backend container on Linux
+This backend container still talks to Ollama on the host machine, so pass the host Ollama URL explicitly:
+
+```bash
+docker run --rm \
+  -p 8000:8000 \
+  --add-host=host.docker.internal:host-gateway \
+  -e OLLAMA_API_URL=http://host.docker.internal:11434/api/generate \
+  real-estate-agent-api:latest
+```
+
+### Test the container
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+```bash
+curl -X POST "http://127.0.0.1:8000/extract-features" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Estimate the price of a 2-story house in NAmes with overall quality 8 out of 10, 1,850 square feet above ground living area, a good kitchen, 2 garage spaces, 1,100 square feet of basement, built in 2004, remodeled in 2008, and 2 full bathrooms."
+  }'
+```
+
+```bash
+curl -X POST "http://127.0.0.1:8000/analyze-query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Estimate the price of a 2-story house in NAmes with overall quality 8 out of 10, 1,850 square feet above ground living area, a good kitchen, 2 garage spaces, 1,100 square feet of basement, built in 2004, remodeled in 2008, and 2 full bathrooms."
+  }'
+```
+
+### Stop/remove the container
+The example run command already uses `--rm`, so the container is removed automatically when it stops. Use `Ctrl+C` in the terminal running Docker to stop it.
+
 ## What is not built yet
 - No Docker workflow refinement
 - No bonus market insights

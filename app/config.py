@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 TARGET_COLUMN = "SalePrice"
@@ -50,7 +51,10 @@ FEATURE_CONFIG_PATH = PROJECT_ROOT / "artifacts" / "feature_config.json"
 PROMPT_EVAL_RESULTS_PATH = PROJECT_ROOT / "artifacts" / "prompt_eval_results.json"
 
 OLLAMA_MODEL_NAME = "gemma3:4b"
-OLLAMA_API_URL = "http://127.0.0.1:11434/api/generate"
+OLLAMA_API_URL = os.getenv(
+    "OLLAMA_API_URL",
+    "http://127.0.0.1:11434/api/generate",
+)
 OLLAMA_TIMEOUT_SECONDS = 400
 OLLAMA_MAX_RETRIES = 2
 OLLAMA_RETRY_DELAY_SECONDS = 1
